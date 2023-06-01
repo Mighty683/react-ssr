@@ -41,7 +41,7 @@ function getRootHandler(rootHTML: string) {
       const router = createStaticRouter(
         staticHandler.dataRoutes,
         context
-       );
+      );
       const stream = renderToPipeableStream(
         <StaticRouterProvider context={context} router={router} />
       );
