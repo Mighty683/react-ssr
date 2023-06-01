@@ -1,10 +1,11 @@
 import express from 'express';
 import { renderToPipeableStream } from 'react-dom/server';
-import { pagesMap } from './src/config/pagesMap';
 import { PassThrough } from 'stream'
 import {glob} from 'glob';
 import {readFile} from 'fs/promises'
 import path from 'node:path';
+import { createStaticRouter, StaticRouterProvider } from 'react-router-dom/server';
+import { staticHandler } from './src/config/serverRouter';
 
 const __dirname = path.dirname(import.meta.url.replace('file://', ''));
 async function start() {
@@ -29,9 +30,17 @@ async function start() {
 
   expressApp.use('*', async (req, res) => {
     try {
-    const pageConfig = pagesMap.find(({ path }) => path === req.path);
-    if (pageConfig) {
-      const stream = renderToPipeableStream(pageConfig.component());
+      const context = await staticHandler.query(new Request(new URL(req.originalUrl, `${req.protocol}://${req.hostname}`)));
+      if (context instanceof Response) {
+        throw context;
+      }
+      const router = createStaticRouter(
+        staticHandler.dataRoutes,
+        context
+       );
+      const stream = renderToPipeableStream(
+        <StaticRouterProvider context={context} router={router} />
+      );
       const sink = new PassThrough();
       const connectedStream = stream.pipe(sink);
       const chunks: unknown[] = [];
@@ -42,9 +51,6 @@ async function start() {
       res.write(rootHTML.replace('<!-- ::APP:: -->', appHTML))
       res.status(200);
       res.send();
-    } else {
-      res.status(404).send('Not found');
-    }
     } catch (e) {
       console.error(e);
       res.status(500).send('Internal server error');

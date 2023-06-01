@@ -1,7 +1,8 @@
 import ReactDOM from "react-dom/client";
-import { HomePage } from "./pages/Home";
+import { browserRouter } from "./config/browserRouter";
+import { RouterProvider } from "react-router-dom";
 
 ReactDOM.hydrateRoot(
   document.getElementById("root") as HTMLElement,
-  <HomePage />
+  <RouterProvider router={browserRouter} />
 );
