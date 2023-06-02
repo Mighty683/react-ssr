@@ -9,6 +9,10 @@ import { createStaticRouter, StaticRouterProvider } from 'react-router-dom/serve
 import { serverRoutes } from './src/navigation/serverRouter';
 import { isPage } from './src/utils/helpers';
 import { staticHandler } from './src/navigation/serverHandler';
+import { PagePropsContext } from './src/utils/PagePropsContext';
+
+
+const __dirname = path.dirname(import.meta.url.replace('file://', ''));
 
 async function start() {
   console.log('Starting server...');
@@ -21,8 +25,6 @@ async function start() {
 }
 
 start();
-
-const __dirname = path.dirname(import.meta.url.replace('file://', ''));
 
 async function registerStaticFilesHandler(expressApp: Express.Application) {
   const staticFiles = await glob(path.resolve(__dirname, '../client/**/*.*'));
@@ -54,19 +56,23 @@ async function reactRenderHTML(req: Express.Request) {
     staticHandler.dataRoutes,
     context
   );
-
-  const stream = renderToPipeableStream(
-    <StaticRouterProvider context={context} router={router} />
-  );
+  let pageProps: unknown;
   for (const match of context.matches) {
     const routeConfig = serverRoutes.find(route => route.path === match.route.path)
     if (routeConfig) {
       const routeComponent = await routeConfig.getComponent();
       if (routeComponent && isPage(routeComponent) && routeComponent.getServerSideData) {
-        await routeComponent.getServerSideData(req)
+        pageProps = await routeComponent.getServerSideData(req)
       }
     }
   }
+
+
+  const stream = renderToPipeableStream(
+    <PagePropsContext.Provider value={pageProps}>
+      <StaticRouterProvider context={context} router={router} />
+    </PagePropsContext.Provider>  
+  );
   const sink = new PassThrough();
   const connectedStream = stream.pipe(sink);
   const chunks: unknown[] = [];
@@ -75,15 +81,22 @@ async function reactRenderHTML(req: Express.Request) {
   }
   const appHTML = chunks.join('');
 
-  return appHTML;
+  return {
+    html: appHTML,
+    props: pageProps
+  };
 }
 
 function getRootHandler(rootHTML: string) {
   return async (req: Express.Request, res: Express.Response) => {
     try {
-      console.log(`Request in root handler: ${req.originalUrl}`);
       if (req.header('Accept')?.includes('text/html')) {
-        res.write(rootHTML.replace('<!-- ::APP:: -->', await reactRenderHTML(req)))
+        const renderResult = await reactRenderHTML(req);
+        let resultHTML = rootHTML.replace('<!-- ::APP:: -->', renderResult.html);
+        if (renderResult.props) {
+          resultHTML = resultHTML.replace('<!-- ::PROPS:: -->', `<script>window.__PAGE_PROPS__ = ${JSON.stringify(renderResult.props)}</script>`);
+        }
+        res.write(resultHTML)
         res.status(200);
         res.send();
       } else {
