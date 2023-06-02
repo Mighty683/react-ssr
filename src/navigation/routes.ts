@@ -1,16 +1,16 @@
 import { RouteObject } from "react-router-dom";
 
 import { lazy } from "react";
-const HomePage = lazy(() => import("../pages/Home").then(module => ({ default: module.HomePage })));
-const UserPage = lazy(() => import("../pages/User").then(module => ({ default: module.UserPage })));
+import { serverRoutes } from "./serverRouter";
 
-export const routes: RouteObject[] = [
-  {
-    path: "*",
-    Component: HomePage,
-  },
-  {
-    path: "/user",
-    Component: UserPage,
-  },
-];
+export const routes: RouteObject[] = serverRoutes.map<RouteObject>(
+  (serverRoute) =>
+    ({
+      ...serverRoute,
+      Component: lazy(() =>
+        serverRoute.getComponent().then((pageComponent) => ({
+          default: pageComponent,
+        }))
+      ),
+    } as RouteObject)
+);

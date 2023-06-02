@@ -1,4 +1,12 @@
-import { createStaticHandler } from 'react-router-dom/server';
-import { routes } from './routes';
+import { RouteObjectServer } from '../utils/types';
 
-export const staticHandler = createStaticHandler(routes);
+export const serverRoutes: RouteObjectServer[] = [
+  {
+    path: "*",
+    getComponent: () => import('../pages/Home').then(module => module.HomePage),
+  },
+  {
+    path: "/user",
+    getComponent :() => import('../pages/User').then(module => module.UserPage),
+  },
+];
