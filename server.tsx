@@ -10,13 +10,25 @@ import { serverRoutes } from './src/navigation/serverRouter';
 import { isPage } from './src/utils/helpers';
 import { staticHandler } from './src/navigation/serverHandler';
 
+async function start() {
+  console.log('Starting server...');
+  const expressApp = express();
+
+  
+  await registerStaticFilesHandler(expressApp);
+  await registerRootHandler(expressApp);
+  startExpressApp(expressApp);
+}
+
+start();
+
 const __dirname = path.dirname(import.meta.url.replace('file://', ''));
 
 async function registerStaticFilesHandler(expressApp: Express.Application) {
   const staticFiles = await glob(path.resolve(__dirname, '../client/**/*.*'));
   for (const file of staticFiles) {
     const path = file.replace(/^.*\/dist\/client/, '');
-    console.log(`Static file: ${path}`);
+    console.log(`Static file path registered: ${path}`);
     expressApp.use(path, async (_, res) => {
       if (file.endsWith('.js')){
         res.header('Content-Type', 'application/javascript');
@@ -69,6 +81,7 @@ async function reactRenderHTML(req: Express.Request) {
 function getRootHandler(rootHTML: string) {
   return async (req: Express.Request, res: Express.Response) => {
     try {
+      console.log(`Request in root handler: ${req.originalUrl}`);
       if (req.header('Accept')?.includes('text/html')) {
         res.write(rootHTML.replace('<!-- ::APP:: -->', await reactRenderHTML(req)))
         res.status(200);
@@ -90,15 +103,3 @@ function startExpressApp(expressApp: Express.Application) {
     console.log(`Server started on port ${port}`);
   });
 }
-
-async function start() {
-  console.log('Starting server...');
-  const expressApp = express();
-
-  
-  await registerStaticFilesHandler(expressApp);
-  await registerRootHandler(expressApp);
-  startExpressApp(expressApp);
-}
-
-start();
