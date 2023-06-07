@@ -56,20 +56,20 @@ async function reactRenderHTML(req: Express.Request) {
     staticHandler.dataRoutes,
     context
   );
-  let pageProps: unknown;
+  let pageServerSideData: unknown;
   for (const match of context.matches) {
     const routeConfig = serverRoutes.find(route => route.path === match.route.path)
     if (routeConfig) {
       const routeComponent = await routeConfig.getComponent();
       if (routeComponent && isPage(routeComponent) && routeComponent.getServerSideData) {
-        pageProps = await routeComponent.getServerSideData(req)
+        pageServerSideData = await routeComponent.getServerSideData(req)
       }
     }
   }
 
 
   const stream = renderToPipeableStream(
-    <PagePropsContext.Provider value={pageProps}>
+    <PagePropsContext.Provider value={pageServerSideData}>
       <StaticRouterProvider context={context} router={router} />
     </PagePropsContext.Provider>  
   );
@@ -83,7 +83,7 @@ async function reactRenderHTML(req: Express.Request) {
 
   return {
     html: appHTML,
-    props: pageProps
+    props: pageServerSideData
   };
 }
 

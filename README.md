@@ -11,4 +11,4 @@ This is repository is a simple example of how to implement a server-side rendere
 ## TODO:
 
 - Navigation between pages how get page data?
-- Build router from file structure
+- Tree shaking server side code
