@@ -13,14 +13,15 @@
       </div>
       <div id="microfrontend-hydrate-container"><!-- ::APP:: --></div>
 
-      <div id="microfrontend-render-container">
-      </div>
+      <div id="microfrontend-render-container"></div>
+
+      <!-- ::DATA:: -->
        <script src="/node_modules/system.js"></script>
        <script type="module">
         System.import('/dist/react-microfrontend.js')
           .then(({ hydrate, render }) => {
-            hydrate(document.getElementById('microfrontend-hydrate-container'));
-            render(document.getElementById('microfrontend-render-container'));
+            hydrate(document.getElementById('microfrontend-hydrate-container'), window.__SERVER_DATA__);
+            render(document.getElementById('microfrontend-render-container'), window.__SERVER_DATA__);
           })
           .catch(err => console.error('Error loading microfrontend:', err));
       </script>

@@ -13,8 +13,9 @@ app.use('/node_modules', Express.static('node_modules/systemjs/dist'));
 app.use('/', async (req, res) => {
   try {
     const indexHtmlFile = await readFile('./index.html', 'utf-8');
-    
-    res.type('html').send(indexHtmlFile.replace('<!-- ::APP:: -->', await renderMicrofrontend()));
+    const renderedElement = indexHtmlFile.replace('<!-- ::APP:: -->', await renderMicrofrontend({ exampleKey: 'exampleValue' }));
+    const renderedData = renderedElement.replace('<!-- ::DATA:: -->', '<script>window.__SERVER_DATA__ = ' + JSON.stringify({ exampleKey: 'exampleValue' }) + ';</script>');
+    res.type('html').send(renderedData);
   } catch (err) {
     res.status(500).send('Error loading index.html');
   }
