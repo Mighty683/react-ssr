@@ -7,8 +7,23 @@
     <title>Vite + React + TS</title>
   </head>
   <body>
-    <!-- ::PROPS:: -->
-    <div id="root"><!-- ::APP:: --></div>
-    <script type="module" src="./src/client.tsx"></script>
+    <div>
+      <div>
+        Here is static content.
+      </div>
+      <div id="microfrontend-hydrate-container"><!-- ::APP:: --></div>
+
+      <div id="microfrontend-render-container">
+      </div>
+       <script src="/node_modules/system.js"></script>
+       <script type="module">
+        System.import('/dist/react-microfrontend.js')
+          .then(({ hydrate, render }) => {
+            hydrate(document.getElementById('microfrontend-hydrate-container'));
+            render(document.getElementById('microfrontend-render-container'));
+          })
+          .catch(err => console.error('Error loading microfrontend:', err));
+      </script>
+    </div>
   </body>
 </html>
