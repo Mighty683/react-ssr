@@ -2,13 +2,8 @@
 
 ## Purpose
 
-This is repository is a simple example of how to implement a server-side rendered React application. It uses the following technologies:
+Test if SystemJS microfrontends can be easly changed to SSR hydrated code in existing SSR applications
 
-- Vite
-- React
-- React Router
+## Result
 
-## TODO:
-
-- Navigation between pages how get page data?
-- Tree shaking server side code
+With proper architecture and handling data loading we can achieve it.
