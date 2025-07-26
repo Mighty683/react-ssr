@@ -11,20 +11,21 @@
       <div>
         Here is static content.
       </div>
-      <div id="microfrontend-hydrate-container"><!-- ::APP:: --></div>
-
-      <div id="microfrontend-render-container"></div>
-
-      <!-- ::DATA:: -->
+      <micro-frontend></micro-frontend>
        <script src="/node_modules/system.js"></script>
        <script type="module">
-        System.import('/dist/react-microfrontend.js')
-          .then(({ hydrate, render }) => {
-            hydrate(document.getElementById('microfrontend-hydrate-container'), window.__SERVER_DATA__);
-            render(document.getElementById('microfrontend-render-container'), window.__SERVER_DATA__);
-          })
-          .catch(err => console.error('Error loading microfrontend:', err));
-      </script>
-    </div>
+        customElements.define('micro-frontend', class extends HTMLElement {
+          constructor() {
+            super();
+          }
+          connectedCallback() {
+            const data = this.getAttribute('data-server');
+            const parsedData = data && JSON.parse(data);
+            System.import('/dist/react-microfrontend.js').then(({ hydrate }) => {
+              hydrate(this, parsedData);
+            })
+          }});
+        </script>
+      </div>
   </body>
 </html>

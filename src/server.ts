@@ -1,6 +1,7 @@
 import Express from 'express';
 import { readFile } from 'fs/promises';
 import { renderMicrofrontend } from './entry-server';
+import { load } from 'cheerio';
 
 
 export const app = Express();
@@ -13,9 +14,13 @@ app.use('/node_modules', Express.static('node_modules/systemjs/dist'));
 app.use('/', async (req, res) => {
   try {
     const indexHtmlFile = await readFile('./index.html', 'utf-8');
-    const renderedElement = indexHtmlFile.replace('<!-- ::APP:: -->', await renderMicrofrontend({ exampleKey: 'exampleValue' }));
-    const renderedData = renderedElement.replace('<!-- ::DATA:: -->', '<script>window.__SERVER_DATA__ = ' + JSON.stringify({ exampleKey: 'exampleValue' }) + ';</script>');
-    res.type('html').send(renderedData);
+    const data = { exampleKey: 'exampleValue' };
+    const renderedElement = await renderMicrofrontend(data);
+    const htmlTree = load(indexHtmlFile);
+    htmlTree('micro-frontend').html(renderedElement);
+    htmlTree('micro-frontend').attr('data-server', JSON.stringify(data));
+    const finalHtml = htmlTree.html();
+    res.type('html').send(finalHtml);
   } catch (err) {
     res.status(500).send('Error loading index.html');
   }
