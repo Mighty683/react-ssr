@@ -6,18 +6,19 @@ import { load } from 'cheerio';
 
 export const app = Express();
 
-// Serve static files first
 app.use('/dist', Express.static('dist'));
 app.use('/node_modules', Express.static('node_modules/systemjs/dist'));
 
-// Handle all other requests
 app.use('/', async (req, res) => {
   try {
     const indexHtmlFile = await readFile('./index.html', 'utf-8');
     const data = { exampleKey: 'exampleValue' };
     const renderedElement = await renderMicrofrontend(data);
     const htmlTree = load(indexHtmlFile);
+    // Inject HTML rendered by React into the micro-frontend element
     htmlTree('micro-frontend').html(renderedElement);
+    // Set the data attribute with the server-side data
+    // This will be used by the client-side code to hydrate the component
     htmlTree('micro-frontend').attr('data-server', JSON.stringify(data));
     const finalHtml = htmlTree.html();
     res.type('html').send(finalHtml);
