@@ -1,28 +1,20 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
+import vue from "@vitejs/plugin-vue";
 
-// https://vitejs.dev/config/
+// https://vite.dev/config/
 export default defineConfig({
-  base: "/",
   define: {
-    'process.env': {
-      NODE_ENV: 'development',
+    "process.env": {
+      NODE_ENV: "development",
     },
   },
   build: {
     sourcemap: true,
     lib: {
-      entry: [
-        "./src/entry-client.tsx",
-      ],
-      name: "ReactMicrofrontend",
-      fileName: () => "react-microfrontend.js",
-    },
-    rollupOptions: {
-      output: {
-        format: "system",
-      },
+      entry: ["./src/entry-client.ts"],
+      name: "VueMicrofrontend",
+      formats: ["es"],
     },
   },
-  plugins: [react()],
+  plugins: [vue()],
 });

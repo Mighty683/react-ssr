@@ -12,8 +12,7 @@
         Here is static content.
       </div>
       <micro-frontend></micro-frontend>
-       <script src="/node_modules/system.js"></script>
-       <script type="module">
+      <script type="module">
         // Register custom element for micro-frontend
         customElements.define('micro-frontend', class extends HTMLElement {
           constructor() {
@@ -22,9 +21,9 @@
           connectedCallback() {
             const data = this.getAttribute('data-server');
             const parsedData = data && JSON.parse(data);
-            System.import('/dist/react-microfrontend.js').then(({ hydrate }) => {
-              hydrate(this, parsedData);
-            })
+            import('/dist/entry-client.js').then((module) => {
+              module.hydrate(this, parsedData);
+            });
           }});
         </script>
       </div>

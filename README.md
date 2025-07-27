@@ -1,9 +1,5 @@
-# react-ssr
+# Vue 3 + TypeScript + Vite
 
-## Purpose
+This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
 
-Test if SystemJS microfrontends can be easly changed to SSR hydrated code in existing SSR applications
-
-## Result
-
-With proper architecture and handling data loading we can achieve it.
+Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
